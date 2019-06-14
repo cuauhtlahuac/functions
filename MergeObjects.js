@@ -7,39 +7,23 @@ const PUF_FetchMore = (route, prev, fetchMoreResult) => {
   // Divide the string to generate new data with Object Assign
   let routeItems = route.split(".");
   const originalRouteItem = routeItems.length;
-  let Results = {};
-  for (let i = routeItems.length; i >= 0; i--) {
-    let result_items = routeItems.join(".");
-    let currentRouteData = _.get(prev, result_items, {});
-    const newResultsRouteData = _.get(fetchMoreResult, result_items, {});
-    let previousRouteData;
-    // console.log(currentRouteData, newResultsRouteData);
-    if (originalRouteItem === i) {
-      const newData = [...currentRouteData, ...newResultsRouteData];
-      //   console.log("CURRENT ROUTE DATA:++++++++++", currentRouteData);
-      //   console.log("NEW DATA: +++++++++++ ", newData);
-      newResults = Object.assign({}, { data: newData });
-      console.log("NEW RESULT ---- - ---- - - ", newResults);
-      Results = Object.assign({}, newResults);
-      console.log("RESULT 1 ****************", Results);
+  let lastItem = "";
+  let result_items = route;
+  let currentRouteData = _.get(prev, result_items, {});
+  let nextRouteData = {};
+  const newResultsRouteData = _.get(fetchMoreResult, result_items, {});
+  let newData = [];
+  for (let i = routeItems.length; i > 0; i--) {
+    lastItem = routeItems.pop();
+    result_items = routeItems.join(".");
+    nextRouteData = _.get(prev, result_items, {});
+    if (i == originalRouteItem && Array.isArray(currentRouteData)) {
+      newData = [...currentRouteData, ...newResultsRouteData];
     }
-    if (originalRouteItem - 1 === i) {
-      Results = Object.assign({}, currentRouteData, previousRouteData);
-      console.log("RESULT 2 ****************", Results);
-      console.log("PREVIOUS ****************", previousRouteData);
-    }
-    if (originalRouteItem - 2 <= i) {
-      Results = Object.assign({}, currentRouteData, previousRouteData);
-      console.log("RESULT 3 ****************", Results);
-      console.log("PREVIOUS ****************", previousRouteData);
-    }
-
-    previousRouteData = currentRouteData;
-    result_items = "";
-    routeItems.pop();
+    newData = Object.assign({}, nextRouteData, { [lastItem]: newData });
+    currentRouteData = nextRouteData;
   }
-
-  return Results;
+  return newData;
 };
 
 var route = "data.feed.base";
